@@ -10,8 +10,6 @@
 #include <errno.h>
 #include <string.h>
 #include <unistd.h>
-#include <sys/stat.h>
-#include <stdlib.h>
 #include <stdbool.h>
 
 #include <wiringPi.h>
@@ -34,10 +32,10 @@ bool fanStatus = true; // determine is fan is on or off
 // fanMode settings (temperature and according speed fan)
 fanMode fanModeList[] = {
         {.temp=0, .speed=0},            // don't turn on the fan until temperature hits 70°C
-        {.temp=70000, .speed=930},
-        {.temp=73000, .speed=964},
-        {.temp=75000, .speed=980},
-        {.temp=79000, .speed=1024}         // go fullSpeed if we're hitting 79,000°C
+        {.temp=70000, .speed=930},      // 70°C / 930
+        {.temp=73000, .speed=964},      // 73°C / 964
+        {.temp=75000, .speed=980},      // 75°C / 980
+        {.temp=79000, .speed=1024}      // go fullSpeed if we're hitting 79,000°C
                          };
 int curFM = 4; // start at fm4, fullspeed
 
@@ -108,14 +106,10 @@ int main()
 
                         // if fan needs to turn off shutit down and change the fanStatus flag
                         if( curFM <= 0 )
-                        { // turn off fan
-                                pwmWrite(1, 0);
+                        // set the flag
                                 fanStatus = false;
-                        }
-                        else
-                        { // slow down fan accordingly to new FanMode
-                                pwmWrite(1, fanModeList[curFM].speed);
-                        }
+                        // slow down fan accordingly to new FanMode
+                       pwmWrite(1, fanModeList[curFM].speed);
                 }
 
                 // Display informations about current fan setting (FanMode, Temperature, FanSpeed)
@@ -129,6 +123,4 @@ int main()
         /**** SHUTDOWN ****/
         return 0;
 }
-
-
 
