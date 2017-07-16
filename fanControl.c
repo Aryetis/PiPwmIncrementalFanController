@@ -1,16 +1,25 @@
 /**************************************************************************************
 
         COMPILE USING : gcc -Wall -o fanControl fanControl.c -lwiringPi -lpthread
+                and give it root privileges as wiringPi needs it to control PWM fan.
+                To do so, you can :
+                        1/ run it as root (duh)
+                        2/ Use some stickybits shenanigans to give it root privileges
+                           regardless of whoever is running it by typing :
+                                chown root.root fanControl
+                                chmod 4755 fanControl
                 (and add the program to the super user crontab to avoid
                 running it manually everytime you reboot your pi)
 
 ***************************************************************************************/
+
 
 #include <stdio.h>
 #include <errno.h>
 #include <string.h>
 #include <unistd.h>
 #include <stdbool.h>
+#include <stdlib.h>
 
 #include <wiringPi.h>
 
@@ -62,6 +71,14 @@ void displayInfo()
 
 int main()
 {
+        /**** DELAY STARTUP ****/
+        // delay the program by argv[1] milliseconds, in case some programs
+        // may hijack GPIO pins in between the start of the program and the main loop
+        // let's say at startup, or use the delay and some scripting to reclaim GPIO
+        // pins from others faulty programs *cough* Mupen64 *cough*
+        if (argc >= 2)
+                delay(atoi(argv[1]));
+
 	/**** INIT ****/
 	// check if wiringPi loaded correctly
 	if (wiringPiSetup () == -1)
